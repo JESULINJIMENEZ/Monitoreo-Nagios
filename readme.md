@@ -31,48 +31,36 @@ sudo mkdir -p nginx/{conf,html}
 
 ### 1.2 Docker Compose
 ```yaml
-version: '3'
+version: '3.7'
 
 services:
-  nagios:
-    image: jasonrivers/nagios:latest
-    ports:
-      - "8080:80"
-    volumes:
-      - /opt/monitoring/nagios/etc:/opt/nagios/etc
-      - /opt/monitoring/nagios/var:/opt/nagios/var
-      - nagios_plugins:/usr/lib/nagios/plugins
-    environment:
-      - NAGIOSADMIN_USER=nagiosadmin
-      - NAGIOSADMIN_PASS=nagios123
-    depends_on:
-      - mysql
-      - nginx
-
   mysql:
-    image: mysql:8.0
+    image: mysql:5.7
+    container_name: mysql_container
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpass
-      - MYSQL_DATABASE=testdb
-      - MYSQL_USER=nagios
-      - MYSQL_PASSWORD=nagios123
-      - MYSQL_ROOT_HOST=%
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
+      MYSQL_DATABASE: techO
     ports:
       - "3306:3306"
-    command: 
-      - --default-authentication-plugin=mysql_native_password
-      - --bind-address=0.0.0.0
+    networks:
+      - mi_proyecto_docker_backend_network
 
-  nginx:
-    image: nginx:latest
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_container
+    environment:
+      PMA_HOST: mysql 
+      MYSQL_ROOT_PASSWORD: rootpassword
     ports:
       - "8081:80"
-    volumes:
-      - ./nginx/conf:/etc/nginx/conf.d
-      - ./nginx/html:/usr/share/nginx/html
+    networks:
+      - mi_proyecto_docker_backend_network
 
-volumes:
-  nagios_plugins:
+networks:
+  mi_proyecto_docker_backend_network:
+    external: true
 ```
 
 ## 2. Archivos de Configuración de Nagios
